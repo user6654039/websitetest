@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="static/css/styles.css" />
+  <style>
+    .hero {
+      position: relative;
+    }
+  
+    .mobile-logo-overlay {
+      display: none;
+    }
+  
+    @media (max-width: 768px) {
+      .nav-center {
+        display: none;
+      }
+  
+      .mobile-logo-overlay {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        z-index: 3;
+        pointer-events: none;
+      }
+  
+      .mobile-logo-overlay img {
+        width: 100%;
+        max-width: 400px;
+        object-fit: contain;
+        opacity: 0.9;
+      }
+  
+      body.works-page {
+        padding-top: 130px;
+      }
+    }
+  </style>
+  
+</head>
+<body>
+  <div id="loader">
+    <div class="spinner"></div>
+  </div>
+
+  <header>
+    <div class="nav-left">
+      <div class="logo-text">
+        <span class="bold">EKSPOZICIJŲ</span> <span class="light">SISTEMOS</span>
+      </div>
+      <img src="/static/images/img.png" alt="Logo" />
+    </div>
+  
+    <div class="nav-center">
+      <img src="/static/images/uzrasas.png" alt="Centered Logo" class="nav-center-img" />
+    </div>
+  
+    <div class="nav-right">
+      <!-- ✅ Desktop switcher -->
+      <div class="lang-switch desktop-lang">
+        <span data-lang="lt" class="lang-option">LT</span> |
+        <span data-lang="en" class="lang-option">EN</span>
+      </div>
+  
+      <!-- ✅ Hamburger icon -->
+      <div class="hamburger" id="hamburger">☰</div>
+  
+      <!-- ✅ Mobile nav dropdown -->
+      <nav id="nav">
+        <a href="works.html" data-i18n="nav.works">Darbai</a>
+        <a href="about_us.html" data-i18n="nav.about">Apie mus</a>
+        <a href="contacts.html" data-i18n="nav.contact">Kontaktai</a>
+  
+        <!-- ✅ Mobile switcher -->
+        <div class="lang-switch mobile-lang">
+          <span data-lang="lt" class="lang-option">LT</span> |
+          <span data-lang="en" class="lang-option">EN</span>
+        </div>
+      </nav>
+    </div>
+  </header>
+  
+  
+  <section class="hero">
+    <div class="hero-bg">
+      <img class="hero-img" />
+    </div>
+    <div class="mobile-logo-overlay">
+      <img src="/static/images/uzrasasw.png" alt="Mobile Hero Logo" />
+    </div>
+  </section>
+
+
+
+  <footer>
+    <div class="footer-container">
+      <div class="footer-section">
+        <h1>UAB „Ekspozicijų sistemos“</h1>
+        <ul>
+          <li>+370 699 44 814</li>
+          <li>vilius@ekspozicijusistemos.lt</li>
+          <li>Kernavės g. 88–146</li>
+          <li>Vilnius LT-08216, Lietuva</li>
+          <li>Įm.k. 123923994</li>
+          <li>PVM k. LT239239917</li>
+        </ul>
+      </div>
+    </div>
+   </footer>
+   </div>
+   <script src="static/js/main.js"></script>
+  
+  
+</body>
+</html>

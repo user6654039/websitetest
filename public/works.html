@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="static/css/styles.css" />
+  <title>Darbai</title>
+<style>
+  @media(max-width: 768px){
+  body{
+    padding-top: 100px;
+  }
+  }
+</style>
+</head>
+
+<body class="works-page">
+  <div id="loader">
+    <div class="spinner"></div>
+  </div>
+<div id="site-wrapper" style="display: none;">
+  <div class="wrapper">
+    
+  <header>
+    <div class="nav-left">
+      <a href="index.html" class="logo-text">
+        <span class="bold">EKSPOZICIJŲ</span> <span class="light">SISTEMOS</span>
+      </a>
+      <img src="/static/images/img.png" alt="Logo" />
+    </div>
+  
+    <div class="nav-center">
+      <img src="/static/images/uzrasas.png" alt="Centered Logo" class="nav-center-img" />
+    </div>
+  
+    <div class="nav-right">
+      <!-- Desktop version (outside nav) -->
+      <div class="lang-switch desktop-lang">
+        <span data-lang="lt" class="lang-option">LT</span> |
+        <span data-lang="en" class="lang-option">EN</span>
+      </div>
+    
+      <!-- Hamburger -->
+      <div class="hamburger" id="hamburger">☰</div>
+    
+      <!-- Mobile menu -->
+      <nav id="nav">
+        <a href="works.html" data-i18n="nav.works">Darbai</a>
+        <a href="about_us.html" class="active" data-i18n="nav.about">Apie mus</a>
+        <a href="contacts.html" data-i18n="nav.contact">Kontaktai</a>
+    
+        <!-- Mobile version (inside nav) -->
+        <div class="lang-switch mobile-lang">
+          <span data-lang="lt" class="lang-option">LT</span> |
+          <span data-lang="en" class="lang-option">EN</span>
+        </div>
+      </nav>
+    </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <section class="section">
+    <div class="grid" id="works-grid">
+      <!-- Dynamic works content will be injected here -->
+    </div>
+    
+  </section>
+  <footer>
+    <div class="footer-container">
+      <div class="footer-section">
+        <h1>UAB „Ekspozicijų sistemos“</h1>
+        <ul>
+          <li>+370 699 44 814</li>
+          <li>vilius@ekspozicijusistemos.lt</li>
+          <li>Kernavės g. 88–146</li>
+          <li>Vilnius LT-08216, Lietuva</li>
+          <li>Įm.k. 123923994</li>
+          <li>PVM k. LT239239917</li>
+        </ul>
+      </div>
+    </div>
+   </footer>
+  </div>
+  </div>
+  <script>
+       const hamburger = document.getElementById('hamburger');
+    const nav = document.getElementById('nav');
+    if (hamburger && nav) {
+      hamburger.addEventListener('click', () => {
+        nav.classList.toggle('show');
+      });
+    }
+  
+    const worksGrid = document.getElementById('works-grid');
+    let worksData = [];
+  
+    // ✅ Language switcher logic (new LT | EN structure)
+    const langSwitchers = document.querySelectorAll('.lang-switch');
+    const langOptions = document.querySelectorAll('.lang-option');
+    let currentLang = localStorage.getItem('lang') || 'lt';
+  
+    function setActiveLang(lang) {
+      langOptions.forEach(el => {
+        el.classList.toggle('active', el.dataset.lang === lang);
+      });
+    }
+  
+    function loadLang(lang) {
+      fetch(`/static/lang/${lang}.json`)
+        .then(res => res.json())
+        .then(data => {
+          document.querySelectorAll('[data-i18n]').forEach(el => {
+            const keys = el.dataset.i18n.split('.');
+            let value = data;
+            keys.forEach(k => value = value?.[k]);
+            if (value) el.textContent = value;
+          });
+        });
+    }
+  
+    langSwitchers.forEach(switcher => {
+      switcher.addEventListener('click', (e) => {
+        const selected = e.target.dataset.lang;
+        if (!selected) return;
+  
+        currentLang = selected;
+        localStorage.setItem('lang', currentLang);
+        loadLang(currentLang);
+        setActiveLang(currentLang);
+        renderWorks(currentLang);
+      });
+    });
+  
+    setActiveLang(currentLang);
+  
+    // ✅ Preload helper
+    function preloadImages(images, callback) {
+      let loaded = 0;
+      const total = images.length;
+      if (total === 0) return callback();
+  
+      images.forEach(src => {
+        const img = new Image();
+        img.onload = img.onerror = () => {
+          loaded++;
+          if (loaded === total) callback();
+        };
+        img.src = src;
+      });
+    }
+  
+    // ✅ Fetch works + preload + show
+    fetch('/api/images')
+      .then(res => res.json())
+      .then(images => {
+        worksData = images.filter(img => img.section === 'works');
+        const allImageUrls = worksData.map(img => img.url);
+  
+        preloadImages(allImageUrls, () => {
+          renderWorks(currentLang);
+          loadLang(currentLang);
+          document.getElementById("loader").style.display = "none";
+          document.getElementById("site-wrapper").style.display = "block";
+        });
+      });
+  
+      function renderWorks(lang) {
+  worksGrid.innerHTML = '';
+  worksData.forEach((item, index) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const link = document.createElement('a');
+    link.href = `work-detail.html?id=${index}`;
+    link.target = '_blank'; // opens in new tab
+
+    const image = document.createElement('img');
+    image.className = 'img1';
+    image.src = item.url;
+    image.loading = 'lazy';
+
+    link.appendChild(image);
+    card.appendChild(link);
+
+    const captionWrapper = document.createElement('div');
+    captionWrapper.className = 'caption';
+    captionWrapper.textContent = lang === 'en' ? item.text_en : item.text_lt;
+
+    card.appendChild(captionWrapper);
+    worksGrid.appendChild(card);
+  });
+}
+
+  </script>
+
+  
+  
+  
+</body>
+</html>

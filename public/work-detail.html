@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Work Detail</title>
+  <link rel="stylesheet" href="static/css/styles.css" />
+  <style>
+.masonry-grid {
+  column-count: 4;
+  column-gap: 1rem;
+  padding: 2rem clamp(1rem, 4vw, 4rem);
+}
+
+.masonry-grid img,
+.masonry-grid video {
+  width: 100%;
+  margin-bottom: 1rem;
+  display: block;
+  break-inside: avoid;
+  object-fit: cover;
+  cursor: pointer;
+}
+@media (max-width: 1200px) {
+  .masonry-grid {
+    column-count: 3;
+  }
+}
+@media (max-width: 768px) {
+  .masonry-grid {
+    column-count: 2;
+  }
+}
+@media (max-width: 480px) {
+  .masonry-grid {
+    column-count: 1;
+  }
+}
+
+
+
+    #lightboxOverlay {
+      display: none;
+    }
+    #lightboxOverlay.hidden {
+      display: none !important;
+    }
+    #lightboxClose {
+      display: none;
+    }
+    #detail-text p {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  text-align: left;
+}
+.inline-paragraphs {
+  display: flex;
+  gap: 2rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.col-paragraph {
+  flex: 1 1 30%;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  text-align: left;
+  word-break: break-word;
+}
+@media (max-width: 768px) {
+  .inline-paragraphs {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .col-paragraph {
+    flex: 1 1 100%;
+    font-size: 1rem;
+  }
+
+
+}
+
+#detail-title{
+  font-size: 1.5rem;
+}
+
+
+
+  </style>
+</head>
+
+<body style="margin: 0; padding: 0;">
+
+  <header>
+    <div class="nav-left">
+      <a href="index.html" class="logo-text">
+        <span class="bold">EKSPOZICIJŲ</span> <span class="light">SISTEMOS</span>
+      </a>
+      <img src="/static/images/img.png" alt="Logo" />
+    </div>
+
+    <div class="nav-center">
+      <img src="/static/images/uzrasas.png" alt="Centered Logo" class="nav-center-img" />
+    </div>
+
+    <div class="nav-right">
+      <div class="lang-switch desktop-lang">
+        <span data-lang="lt" class="lang-option">LT</span> |
+        <span data-lang="en" class="lang-option">EN</span>
+      </div>
+
+      <div class="hamburger" id="hamburger">☰</div>
+
+      <nav id="nav">
+        <a href="works.html" data-i18n="nav.works">Darbai</a>
+        <a href="about_us.html" class="active" data-i18n="nav.about">Apie mus</a>
+        <a href="contacts.html" data-i18n="nav.contact">Kontaktai</a>
+
+        <div class="lang-switch mobile-lang">
+          <span data-lang="lt" class="lang-option">LT</span> |
+          <span data-lang="en" class="lang-option">EN</span>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="work-detail-section" style="padding: 0; margin: 0;">
+    <div id="hero-image-container">
+      <img id="detail-image" style="width: 100vw; height: 80vh; object-fit: cover; display: block;" />
+    </div>
+
+    <div id="text-block" style="padding: 2rem clamp(1rem, 4vw, 4rem); text-align: left;">
+      <h1 id="detail-title" clas="detailh1">Loading...</h1>
+      <p id="detail-text" style="font-size: 1.2rem; line-height: 1.7; word-break: break-word;"></p>
+    </div>
+
+    <div id="extra-images" class="masonry-grid"></div>
+
+  </main>
+
+  <!-- Lightbox Overlay -->
+  <div id="lightboxOverlay" class="hidden" style="
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(5px);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  ">
+    <div style="position: relative;">
+      <img id="lightboxImage" src="" style="max-width: 90vw; max-height: 90vh;" />
+      <button id="lightboxClose" style="
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        background: #fff;
+        border: none;
+        font-size: 24px;
+        font-weight: bold;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+      ">×</button>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+
+    fetch('/api/images')
+      .then(res => res.json())
+      .then(images => {
+        const works = images.filter(img => img.section === 'works');
+        const item = works[id];
+        if (!item) return document.getElementById('detail-title').textContent = 'Not found';
+
+        const lang = localStorage.getItem('lang') || 'lt';
+
+        document.getElementById('detail-title').textContent = lang === 'en' ? item.text_en : item.text_lt;
+        document.getElementById('detail-image').src = item.url;
+        const raw = item.fulltext?.[lang] || '';
+const words = raw.replace(/\s+/g, " ").trim().split(" ");
+const chunkSize = Math.ceil(words.length / 3);
+
+const chunks = [
+  words.slice(0, chunkSize).join(" "),
+  words.slice(chunkSize, 2 * chunkSize).join(" "),
+  words.slice(2 * chunkSize).join(" ")
+];
+
+document.getElementById('detail-text').innerHTML = `
+  <div class="inline-paragraphs">
+    <div class="col-paragraph">${chunks[0]}</div>
+    <div class="col-paragraph">${chunks[1]}</div>
+    <div class="col-paragraph">${chunks[2]}</div>
+  </div>
+`;
+
+
+        const container = document.getElementById('extra-images');
+        if (Array.isArray(item.extraImages)) {
+          item.extraImages.forEach(img => {
+  let el;
+
+  if (/\.(mp4|webm|ogg)$/i.test(img)) {
+  el = document.createElement('video');
+  el.src = img;
+  el.muted = true;
+  el.autoplay = true;
+  el.loop = true;
+  el.playsInline = true;
+  el.controls = false;
+  el.style.cursor = 'zoom-in';
+  el.addEventListener('click', () => {
+    openLightboxWithVideo(img);
+  });
+} else {
+  el = document.createElement('img');
+  el.src = img;
+  el.style.cursor = 'zoom-in';
+  el.addEventListener('click', () => {
+    openLightboxWithImage(img);
+  });
+}
+
+  el.style.width = '100%';
+
+  el.style.display = 'block';
+  container.appendChild(el);
+});
+
+        }
+      });
+
+    // Language switch
+    const langOptions = document.querySelectorAll('.lang-option');
+    langOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        const selectedLang = option.dataset.lang;
+        localStorage.setItem('lang', selectedLang);
+        setActiveLang(selectedLang);
+        renderContent(selectedLang);
+      });
+    });
+
+    function setActiveLang(lang) {
+      langOptions.forEach(opt => {
+        opt.classList.toggle('active', opt.dataset.lang === lang);
+      });
+    }
+
+    function renderContent(lang) {
+      fetch('/api/images')
+        .then(res => res.json())
+        .then(images => {
+          const works = images.filter(img => img.section === 'works');
+          const item = works[id];
+          if (!item) return;
+          document.getElementById('detail-title').textContent = lang === 'en' ? item.text_en : item.text_lt;
+          const raw = item.fulltext?.[lang] || '';
+const words = raw.replace(/\s+/g, " ").trim().split(" ");
+const chunkSize = Math.ceil(words.length / 3);
+
+const chunks = [
+  words.slice(0, chunkSize).join(" "),
+  words.slice(chunkSize, 2 * chunkSize).join(" "),
+  words.slice(2 * chunkSize).join(" ")
+];
+
+document.getElementById('detail-text').innerHTML = `
+  <div class="inline-paragraphs">
+    <div class="col-paragraph">${chunks[0]}</div>
+    <div class="col-paragraph">${chunks[1]}</div>
+    <div class="col-paragraph">${chunks[2]}</div>
+  </div>
+`;
+
+        });
+    }
+
+    const currentLang = localStorage.getItem('lang') || 'lt';
+    setActiveLang(currentLang);
+
+    // Hamburger toggle
+    const hamburger = document.getElementById('hamburger');
+    const nav = document.getElementById('nav');
+    hamburger?.addEventListener('click', () => {
+      nav.classList.toggle('show');
+    });
+
+    // Lightbox controls
+    const lightbox = document.getElementById('lightboxOverlay');
+    const lightboxImage = document.getElementById('lightboxImage');
+    const lightboxClose = document.getElementById('lightboxClose');
+
+    lightboxClose.addEventListener('click', () => {
+      removeLightboxVideo(); // 👈 add this
+      lightbox.classList.add('hidden');
+      lightbox.style.display = 'none';
+      lightboxImage.src = '';
+      lightboxClose.style.display = 'none';
+    });
+
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) {
+        removeLightboxVideo(); // 👈 add this
+        lightbox.classList.add('hidden');
+        lightbox.style.display = 'none';
+        lightboxImage.src = '';
+        lightboxClose.style.display = 'none';
+      }
+    });
+    function openLightboxWithImage(src) {
+  lightboxImage.src = src;
+  lightboxImage.style.display = 'block';
+  removeLightboxVideo();
+  lightbox.classList.remove('hidden');
+  lightbox.style.display = 'flex';
+  lightboxClose.style.display = 'block';
+}
+
+function openLightboxWithVideo(src) {
+  removeLightboxVideo();
+  const video = document.createElement('video');
+  video.src = src;
+  video.controls = true;
+  video.autoplay = true;
+  video.style.maxWidth = '90vw';
+  video.style.maxHeight = '90vh';
+  video.id = 'lightboxVideo';
+
+  const parent = lightboxImage.parentNode;
+  lightboxImage.style.display = 'none';
+  parent.appendChild(video);
+
+  lightbox.classList.remove('hidden');
+  lightbox.style.display = 'flex';
+  lightboxClose.style.display = 'block';
+}
+
+function removeLightboxVideo() {
+  const video = document.getElementById('lightboxVideo');
+  if (video) {
+    try {
+      video.pause();
+      video.src = '';           // clear source
+      video.load();             // stop loading/playing
+    } catch (e) {
+      console.warn('Error stopping video:', e);
+    }
+    video.remove();
+  }
+}
+
+  </script>
+</body>
+</html>

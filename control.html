@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Website Control Panel</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; background: #f0f0f0; }
+    .tabs { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .tab { padding: 0.5rem 1rem; background: #ddd; cursor: pointer; border-radius: 6px; }
+    .tab.active { background: #444; color: white; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    form, .image-list {
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      max-width: 700px;
+      margin-bottom: 2rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      border: none;
+      background-color: #444;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .image-entry {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .image-entry img {
+      height: 60px;
+      width: 80px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+    .image-entry span {
+  flex: 1;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+  </style>
+</head>
+<body>
+
+
+  <!-- ADMIN PANEL -->
+  <div id="admin-panel">
+
+    <a href="/logout" style="float:right;">Logout</a>
+  <h1>Website Content Manager</h1>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="main">Main Page</div>
+    <div class="tab" data-tab="works">Works Page</div>
+    <div class="tab" data-tab="contact">Contact Page</div>
+    <div class="tab" data-tab="about">About Page</div>
+  </div>
+
+  <!-- === Main Page Tab === -->
+  <div id="main" class="tab-content active">
+    <h2>Hero Images</h2>
+    <form id="heroForm" action="/upload-multiple-hero" method="POST" enctype="multipart/form-data">
+      <input type="hidden" name="section" value="hero" />
+      <input type="hidden" id="editHeroIndex" name="editHeroIndex" />
+      <label>Upload Multiple Images:</label>
+      <input type="file" name="images" multiple />
+      <button type="submit">Upload All</button>
+    </form>
+    <div class="image-list" id="heroContainer"></div>
+  </div>
+
+  <!-- === Works Tab === -->
+  <div id="works" class="tab-content">
+    <form id="worksForm" action="/upload" method="POST" enctype="multipart/form-data">
+      <input type="hidden" name="section" value="works" />
+      <input type="hidden" name="editIndex" id="editWorksIndex" />
+      
+      <label>Cover Image:</label>
+      <input type="file" name="image" />
+  
+      <label>Short Text (LT):</label>
+      <textarea name="text_lt"></textarea>
+  
+      <label>Short Text (EN):</label>
+      <textarea name="text_en"></textarea>
+  
+      <label>Full Text (LT):</label>
+      <textarea name="fulltext_lt"></textarea>
+  
+      <label>Full Text (EN):</label>
+      <textarea name="fulltext_en"></textarea>
+  
+      <label>Extra Images (multiple):</label>
+      <input type="file" name="extraImages" multiple />
+  
+      <button type="submit">Save Works Entry</button>
+    </form>
+  
+    <div class="image-list" id="worksContainer"></div>
+  </div>
+
+  <!-- === About Tab === -->
+  <div id="about" class="tab-content">
+    <form id="aboutForm" action="/uploadAbout" method="POST" enctype="multipart/form-data">
+      <input type="hidden" name="editIndex" id="editAboutIndex" />
+      <label>Section Title:</label>
+      <input type="text" name="title" />
+      <label>Text (Lithuanian):</label>
+      <textarea name="text_lt"></textarea>
+      <label>Text (English):</label>
+      <textarea name="text_en"></textarea>
+      <label>Image:</label>
+      <input type="file" name="image" />
+      <button type="submit">Save About Section</button>
+    </form>
+    <div class="image-list" id="aboutContainer"></div>
+  </div>
+
+  <!-- === Contact Tab === -->
+  <div id="contact" class="tab-content">
+    <h2>Top Contact Image</h2>
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+      <input type="hidden" name="section" value="contact" />
+      <input type="hidden" name="editIndex" value="0" />
+      <label>Image:</label>
+      <input type="file" name="image" />
+      <button type="submit">Upload Top Image</button>
+    </form>
+
+    <h2>Bottom Contact Image</h2>
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+      <input type="hidden" name="section" value="contact" />
+      <input type="hidden" name="editIndex" value="1" />
+      <label>Image:</label>
+      <input type="file" name="image" />
+      <button type="submit">Upload Bottom Image</button>
+    </form>
+    <div class="image-list" id="contactContainer"></div>
+  </div>
+</div>
+<script src="static/js/control.js"></script>
+
+</body>
+</html>
