@@ -253,13 +253,20 @@
     // Clean & split the text
     const cleanText = rawText.replace(/<\/?[^>]+(>|$)/g, "").replace(/\s+/g, " ").trim(); // Remove HTML, normalize spaces
     const words = cleanText.split(" ");
-    const chunkSize = Math.ceil(words.length / 3);
+    const charCount = cleanText.length;
     const paragraphs = [];
 
-    for (let i = 0; i < 3; i++) {
-      const chunk = words.slice(i * chunkSize, (i + 1) * chunkSize).join(" ");
-      if (chunk.length > 0) {
-        paragraphs.push(`<p>${chunk}</p>`);
+    if (words.length < 60 || charCount < 300) {
+      // Short text → single full-width paragraph
+      paragraphs.push(`<p style="flex: 1 1 100%;">${cleanText}</p>`);
+    } else {
+      // Long text → split into 3 columns
+      const chunkSize = Math.ceil(words.length / 3);
+      for (let i = 0; i < 3; i++) {
+        const chunk = words.slice(i * chunkSize, (i + 1) * chunkSize).join(" ");
+        if (chunk.length > 0) {
+          paragraphs.push(`<p>${chunk}</p>`);
+        }
       }
     }
 
@@ -267,12 +274,11 @@
       <section class="about-block">
         <img src="${section.image}" alt="about image" />
         <div class="text-wrap">
-  <h2>${section.title}</h2>
-  <div class="multi-col-text">
-    ${paragraphs.join("")}
-  </div>
-</div>
-
+          <h2>${section.title}</h2>
+          <div class="multi-col-text">
+            ${paragraphs.join("")}
+          </div>
+        </div>
       </section>
     `;
   });

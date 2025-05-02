@@ -136,7 +136,8 @@
 
     <div id="text-block" style="padding: 2rem clamp(1rem, 4vw, 4rem); text-align: left;">
       <h1 id="detail-title" clas="detailh1">Loading...</h1>
-      <p id="detail-text" style="font-size: 1.2rem; line-height: 1.7; word-break: break-word;"></p>
+      <div id="detail-text" style="font-size: 1.2rem; line-height: 1.7; word-break: break-word;"></div>
+
     </div>
 
     <div id="extra-images" class="masonry-grid"></div>
@@ -155,21 +156,23 @@
     align-items: center;
     z-index: 9999;
   ">
-    <div style="position: relative;">
-      <img id="lightboxImage" src="" style="max-width: 90vw; max-height: 90vh;" />
-      <button id="lightboxClose" style="
-        position: absolute;
-        top: -20px;
-        right: -20px;
-        background: #fff;
-        border: none;
-        font-size: 24px;
-        font-weight: bold;
-        width: 40px;
-        height: 40px;
-        cursor: pointer;
-      ">×</button>
-    </div>
+<div style="position: relative;">
+  <button id="lightboxPrev" style="position: absolute; top: 50%; left: -60px; transform: translateY(-50%); font-size: 2rem;">←</button>
+  <img id="lightboxImage" src="" style="max-width: 90vw; max-height: 90vh;" />
+  <button id="lightboxNext" style="position: absolute; top: 50%; right: -60px; transform: translateY(-50%); font-size: 2rem;">→</button>
+  <button id="lightboxClose" style="
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  background: #fff;
+  border: none;
+  font-size: 24px;
+  font-weight: bold;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+">×</button>
+
   </div>
 
   <script>
@@ -187,56 +190,64 @@
 
         document.getElementById('detail-title').textContent = lang === 'en' ? item.text_en : item.text_lt;
         document.getElementById('detail-image').src = item.url;
-        const raw = item.fulltext?.[lang] || '';
-const words = raw.replace(/\s+/g, " ").trim().split(" ");
-const chunkSize = Math.ceil(words.length / 3);
+const raw = item.fulltext?.[lang] || '';
+const cleanedText = raw.replace(/\s+/g, " ").trim();
+const words = cleanedText.split(" ");
+const charCount = cleanedText.length;
 
-const chunks = [
-  words.slice(0, chunkSize).join(" "),
-  words.slice(chunkSize, 2 * chunkSize).join(" "),
-  words.slice(2 * chunkSize).join(" ")
-];
+if (words.length < 60 || charCount < 300) {
+  document.getElementById('detail-text').innerHTML = `<p>${cleanedText}</p>`;
+} else {
+  const chunkSize = Math.ceil(words.length / 3);
+  const chunks = [
+    words.slice(0, chunkSize).join(" "),
+    words.slice(chunkSize, 2 * chunkSize).join(" "),
+    words.slice(2 * chunkSize).join(" ")
+  ];
 
-document.getElementById('detail-text').innerHTML = `
-  <div class="inline-paragraphs">
-    <div class="col-paragraph">${chunks[0]}</div>
-    <div class="col-paragraph">${chunks[1]}</div>
-    <div class="col-paragraph">${chunks[2]}</div>
-  </div>
-`;
+  document.getElementById('detail-text').innerHTML = `
+    <div class="inline-paragraphs">
+      <div class="col-paragraph">${chunks[0]}</div>
+      <div class="col-paragraph">${chunks[1]}</div>
+      <div class="col-paragraph">${chunks[2]}</div>
+    </div>
+  `;
+}
 
 
         const container = document.getElementById('extra-images');
         if (Array.isArray(item.extraImages)) {
-          item.extraImages.forEach(img => {
+          mediaList = item.extraImages;
+
+item.extraImages.forEach((img, index) => {
   let el;
 
   if (/\.(mp4|webm|ogg)$/i.test(img)) {
-  el = document.createElement('video');
-  el.src = img;
-  el.muted = true;
-  el.autoplay = true;
-  el.loop = true;
-  el.playsInline = true;
-  el.controls = false;
-  el.style.cursor = 'zoom-in';
-  el.addEventListener('click', () => {
-    openLightboxWithVideo(img);
-  });
-} else {
-  el = document.createElement('img');
-  el.src = img;
-  el.style.cursor = 'zoom-in';
-  el.addEventListener('click', () => {
-    openLightboxWithImage(img);
-  });
-}
+    el = document.createElement('video');
+    el.src = img;
+    el.muted = true;
+    el.autoplay = true;
+    el.loop = true;
+    el.playsInline = true;
+    el.controls = false;
+    el.style.cursor = 'zoom-in';
+    el.addEventListener('click', () => {
+      openLightbox(index);
+    });
+  } else {
+    el = document.createElement('img');
+    el.src = img;
+    el.style.cursor = 'zoom-in';
+    el.addEventListener('click', () => {
+      openLightbox(index);
+    });
+  }
 
   el.style.width = '100%';
-
   el.style.display = 'block';
   container.appendChild(el);
 });
+
 
         }
       });
@@ -267,22 +278,31 @@ document.getElementById('detail-text').innerHTML = `
           if (!item) return;
           document.getElementById('detail-title').textContent = lang === 'en' ? item.text_en : item.text_lt;
           const raw = item.fulltext?.[lang] || '';
-const words = raw.replace(/\s+/g, " ").trim().split(" ");
-const chunkSize = Math.ceil(words.length / 3);
+const cleanedText = raw.replace(/\s+/g, " ").trim();
+const words = cleanedText.split(" ");
+const charCount = cleanedText.length;
 
-const chunks = [
-  words.slice(0, chunkSize).join(" "),
-  words.slice(chunkSize, 2 * chunkSize).join(" "),
-  words.slice(2 * chunkSize).join(" ")
-];
+if (words.length < 60 || charCount < 300) {
+  // Short text → single block
+  document.getElementById('detail-text').innerHTML = `<p>${cleanedText}</p>`;
+} else {
+  // Long text → split in columns
+  const chunkSize = Math.ceil(words.length / 3);
+  const chunks = [
+    words.slice(0, chunkSize).join(" "),
+    words.slice(chunkSize, 2 * chunkSize).join(" "),
+    words.slice(2 * chunkSize).join(" ")
+  ];
 
-document.getElementById('detail-text').innerHTML = `
-  <div class="inline-paragraphs">
-    <div class="col-paragraph">${chunks[0]}</div>
-    <div class="col-paragraph">${chunks[1]}</div>
-    <div class="col-paragraph">${chunks[2]}</div>
-  </div>
-`;
+  document.getElementById('detail-text').innerHTML = `
+    <div class="inline-paragraphs">
+      <div class="col-paragraph">${chunks[0]}</div>
+      <div class="col-paragraph">${chunks[1]}</div>
+      <div class="col-paragraph">${chunks[2]}</div>
+    </div>
+  `;
+}
+
 
         });
     }
@@ -301,6 +321,8 @@ document.getElementById('detail-text').innerHTML = `
     const lightbox = document.getElementById('lightboxOverlay');
     const lightboxImage = document.getElementById('lightboxImage');
     const lightboxClose = document.getElementById('lightboxClose');
+    let currentMediaIndex = 0;
+    let mediaList = [];
 
     lightboxClose.addEventListener('click', () => {
       removeLightboxVideo(); // 👈 add this
@@ -319,32 +341,42 @@ document.getElementById('detail-text').innerHTML = `
         lightboxClose.style.display = 'none';
       }
     });
-    function openLightboxWithImage(src) {
-  lightboxImage.src = src;
-  lightboxImage.style.display = 'block';
-  removeLightboxVideo();
+    function openLightbox(index) {
+  currentMediaIndex = index;
+  showMedia(mediaList[index]);
   lightbox.classList.remove('hidden');
   lightbox.style.display = 'flex';
   lightboxClose.style.display = 'block';
 }
+document.getElementById('lightboxPrev').addEventListener('click', (e) => {
+  e.stopPropagation();
+  currentMediaIndex = (currentMediaIndex - 1 + mediaList.length) % mediaList.length;
+  showMedia(mediaList[currentMediaIndex]);
+});
 
-function openLightboxWithVideo(src) {
-  removeLightboxVideo();
-  const video = document.createElement('video');
-  video.src = src;
-  video.controls = true;
-  video.autoplay = true;
-  video.style.maxWidth = '90vw';
-  video.style.maxHeight = '90vh';
-  video.id = 'lightboxVideo';
-
+document.getElementById('lightboxNext').addEventListener('click', (e) => {
+  e.stopPropagation();
+  currentMediaIndex = (currentMediaIndex + 1) % mediaList.length;
+  showMedia(mediaList[currentMediaIndex]);
+});
+function showMedia(src) {
   const parent = lightboxImage.parentNode;
+  removeLightboxVideo();
   lightboxImage.style.display = 'none';
-  parent.appendChild(video);
 
-  lightbox.classList.remove('hidden');
-  lightbox.style.display = 'flex';
-  lightboxClose.style.display = 'block';
+  if (/\.(mp4|webm|ogg)$/i.test(src)) {
+    const video = document.createElement('video');
+    video.src = src;
+    video.controls = true;
+    video.autoplay = true;
+    video.style.maxWidth = '90vw';
+    video.style.maxHeight = '90vh';
+    video.id = 'lightboxVideo';
+    parent.appendChild(video);
+  } else {
+    lightboxImage.src = src;
+    lightboxImage.style.display = 'block';
+  }
 }
 
 function removeLightboxVideo() {
